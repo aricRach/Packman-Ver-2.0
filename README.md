@@ -14,6 +14,19 @@ if you eat other packman your score increasing by 1 point.
 - **Fruit:**
 if you eat fruit your score increasing by 1 point.
 
+By creating play object and give him path and name of example file that include all
+the elements in a csv file we create the initial object that allow us to play.
+
+After that we must give an id number according to the number ofplayers (up to three)in order to store
+the information of the game in specific data base under the id that we gave so that we can watch our results and other.
+
+We choose our player specific initial location that we start from.
+
+In order to make the player move we need to use rotate function by give the function angle the player know where to go.
+
+In order to know the state of the game we use the function get board that helps us show the moving on the screen.
+
+
 ## *Automatic program:*
 ###### *Main Algorithm idea:*
 
