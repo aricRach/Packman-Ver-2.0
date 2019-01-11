@@ -91,7 +91,7 @@ public class guiGame extends JFrame
 
 	static ImageIcon imageIcon;
 	static MyJLabel jLabel ;
-
+		
 	// Constructor //
 	public guiGame ()
 	{
@@ -182,6 +182,7 @@ public class guiGame extends JFrame
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
+					
 					fruits.clear();
 					packmans.clear();
 					ghosts.clear();
@@ -201,7 +202,6 @@ public class guiGame extends JFrame
 				//call stam function
 				String data=Stam.exploitData();
 				//then send it into writeResults
-				
 				writeResults(data);
 			}
 		});
@@ -298,12 +298,12 @@ public class guiGame extends JFrame
 		String folder = fd.getDirectory();
 		String fileName = fd.getFile();       
 		this.setTitle(fileName);// give the game the name of the file
-
 		// create the game 
 		g=new game(fruits,packmans,ghosts,boxes);
 
 		// create the play according to the file we open
 		setPlay1(new Play(folder+"\\"+fileName));
+		System.out.println("hashhh"+play1.getHash1());
 
 		ArrayList<String>gameString=getPlay1().getBoard();// put in gameString all the data about the game
 
@@ -504,6 +504,8 @@ class MyJLabel extends JLabel implements MouseListener,MouseMotionListener
 	 */
 	private void startGame() {
 
+		guiGame.getPlay1().getHash1();
+
 		new Thread() // annonymy thread
 		{
 			public void run()
@@ -632,10 +634,10 @@ class MyJLabel extends JLabel implements MouseListener,MouseMotionListener
 		double x=guiGame.fruits.get(0).getX();
 		double y=guiGame.fruits.get(0).getY();
 		//400 //500
-		Point3D playerCoords=converts.pixel2Coords(x, y,getHeight(), getWidth());
+		Point3D playerCoords=converts.pixel2Coords(400, 500,getHeight(), getWidth());
 		guiGame.getPlay1().setInitLocation(playerCoords.x(),playerCoords.y());
 		metaDataPack data=new metaDataPack("M",20,1);
-		guiGame.player=new packman(data,new Point3D(x,y));
+		guiGame.player=new packman(data,new Point3D(400,500));
 		
 		repaint();
 		System.out.println("Player created the game start");
