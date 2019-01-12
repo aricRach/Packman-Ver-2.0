@@ -28,7 +28,7 @@ In order to know the state of the game we use the function get board that helps 
 
 
 ## *Automatic program:*
-###### *Main Algorithm idea:*
+**Main Algorithm idea:**
 
 ###### *Build Graph*
 Check all the optional lines between Player, all fruits and all boxes vertexes, then check between any 2 Points if there is valid line then add this line to the graph.
@@ -41,32 +41,6 @@ After we received the shortest path, we iterate the Path points and calculate az
 
 ###### *Find closest fruit*
 By using Dijakstra Algorithm we can calculate the distance between Player position to fruits positions and find the closest fruit.
-
-## *More details about automatic program (include checks):*
-Firstly, we set location to our Packman Player at the same place of the first fruit in our ArrayList.
-
-Then we check all the optional lines between our player location to all boxes vertexes,
-in addition we check all the fruits to all boxes edges vertexes.
-
-## *Our Algorithm checks contain some checks:*
-
-- We check if one of the positions (source and destination) is inside other boxes
-then we don’t want to check those points.
-
-- If the source and destination points are 2 opposite edges of the same box
-(left down corner and right up corner or left up corner and right down corner)
-then we don't want to check line between those points.
-
-- If this vertical line then we call to function "ValidLine" for be sure there is no box between the y-Axis ranges.
-
-###### *ValidLine function*
-Check equation of line between source and destination and check if one of the boxes is cut the stretch line.
-
-###### *BuildGraph function*
-If all checks passed between 2 points then we use our Function addToGraph.
-
-###### *AddToGraph function*
-For every 2 points that passed all the checks we addEdge to our graph with the distance between those points.
 
 ## *Human program:*
 There is another optional to play Packman-Game by your mouse.
