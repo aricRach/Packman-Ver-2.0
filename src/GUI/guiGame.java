@@ -5,10 +5,6 @@ import java.awt.FileDialog;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.MouseInfo;
-import java.awt.PaintContext;
-import java.awt.Point;
-import java.awt.PointerInfo;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -17,18 +13,14 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-
 import javax.imageio.ImageIO;
-import javax.management.RuntimeErrorException;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -38,14 +30,11 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
-
 import Algo.equation;
-import Coords.MyCoords;
 import GIS.box;
 import GIS.fruit;
 import GIS.game;
 import GIS.ghost;
-import GIS.metaDataFruit;
 import GIS.metaDataPack;
 import GIS.packman;
 import Geom.Point3D;
@@ -54,8 +43,8 @@ import Map.pix;
 import Robot.Play;
 
 /**
- * this class represent Gui Window with menuBar , options such as : open Csv , save Csv , save KML , run,
- * showing the progress of the game(packmans in their way to eat the fruits)
+ * this class represent GUI Window with menuBar , options such as : run-automatic game or placing the player for human game,
+ * showing the progress of the game(packmans in their way to eat the fruits) and ghosts chasing the player
  * @author Tal and Aric
  */
 
@@ -66,7 +55,7 @@ public class guiGame extends JFrame
 	static JMenuBar wholeMenuBar;
 	static JMenu fileMenu,input,start;
 	static JMenuItem openItem, saveItem,clearItem;
-	static JMenuItem packmanItem,fruitItem,ghostItem,playerItem;
+	static JMenuItem playerItem;
 	static JMenuItem runItem,stepItem;
 
 	static converts c;
@@ -82,9 +71,6 @@ public class guiGame extends JFrame
 	static int x = -1; // for initialize
 	static int y = -1; // for initialize
 
-	static boolean addPack;
-	static boolean addFruit;
-	static boolean addGhost;
 	static boolean addPlayer;
 	static boolean step;
 	static boolean run;
@@ -101,9 +87,6 @@ public class guiGame extends JFrame
 		ghosts=new ArrayList<ghost>();
 		boxes=new ArrayList<box>();
 
-		addPack=false;
-		addFruit=false;
-		addGhost=false;
 		addPlayer=false;
 		step=false;
 		run=false;
@@ -127,15 +110,6 @@ public class guiGame extends JFrame
 		fileMenu = new JMenu("File");
 		input = new JMenu("Input");
 		start = new JMenu("start");
-
-		packmanItem =new JMenuItem("packman");
-		input.add(packmanItem);
-
-		fruitItem =new JMenuItem("fruit");
-		input.add(fruitItem);
-
-		ghostItem =new JMenuItem("ghost");
-		input.add(ghostItem);
 
 		playerItem =new JMenuItem("player");
 		input.add(playerItem);
@@ -200,7 +174,7 @@ public class guiGame extends JFrame
 		saveItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				//call stam function
-				String data=Stam.exploitData();
+				String data=saveStatistics.exploitData();
 				//then send it into writeResults
 				writeResults(data);
 			}
@@ -217,24 +191,6 @@ public class guiGame extends JFrame
 				player=null;
 				playerItem.setEnabled(true);
 				repaint();
-			}
-		});
-
-		packmanItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				addPack=true;
-			}
-		});
-
-		fruitItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				addFruit=true;
-			}
-		});
-
-		ghostItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				addGhost=true;
 			}
 		});
 
@@ -349,14 +305,12 @@ public class guiGame extends JFrame
 						return name.endsWith(".txt");
 					}
 				});
-		//		fd.setVisible(true);
 				String folder = fd.getDirectory();
 				String fileName = fd.getFile();
 				try {
 				FileWriter fw = new FileWriter(folder + fileName);
 					PrintWriter outs = new PrintWriter(fw);
 
-			    //	String csvString=writeCsv.Write(fruits, packmans,getHeight(),getWidth());
 				outs.println(results);
 					outs.close();
 					fw.close();
@@ -513,7 +467,6 @@ class MyJLabel extends JLabel implements MouseListener,MouseMotionListener
 				while(guiGame.getPlay1().isRuning())
 				{
 					guiGame.getPlay1().rotate(angle);
-					//System.out.println(guiGame.getPlay1().getStatistics());
 
 					//game!
 					ArrayList<String> gameAfterStep=guiGame.getPlay1().getBoard();
@@ -523,13 +476,11 @@ class MyJLabel extends JLabel implements MouseListener,MouseMotionListener
 						game.paintGame(getHeight(), getWidth());
 
 						try {
-							Thread.sleep(100);// get time to draw before make more iteration
+							Thread.sleep(100); // get time to draw before make more iteration
 						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					} catch (IOException e1) {
-						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
 				}
@@ -539,102 +490,17 @@ class MyJLabel extends JLabel implements MouseListener,MouseMotionListener
 			}
 		}.start();
 	}
-
-
-//	public  void startAutoPlay() throws IOException {
-//
-//	//	Point3D firstFruitPos=(guiGame.fruits.get(0).getPosition());
-//		Point3D playerCoords=converts.pixel2Coords(200, 420,getHeight(), getWidth());
-//		guiGame.getPlay1().setInitLocation(playerCoords.x(),playerCoords.y());
-//		
-//		metaDataPack data=new metaDataPack("M",20,1);
-//	//	Point3D position =new Point3D(50,400,0); // add packman location in pixels
-//		guiGame.player=new packman(data,new Point3D(200,420));
-//		repaint();				
-//		//set init location for the player
-//	//	 playerCoords=converts.pixel2Coords(50, 400,getHeight(), getWidth());
-//	//	guiGame.getPlay1().setInitLocation(playerCoords.x(),playerCoords.y());
-//		System.out.println("Player created the game start");
-//		guiGame.getPlay1().start();
-//		//System.out.println(guiGame.getPlay1().getBoard());
-//			
-//		double radius=guiGame.player.getRadius();
-//		new Thread() // annonymy thread
-//		{
-//			public void run()
-//			{
-//
-//				while(guiGame.getPlay1().isRuning()) {
-//
-//					int index = 0;
-//					try {
-//						index = equation.minToEat(guiGame.boxes,guiGame.fruits, guiGame.player.getPosition());
-//					} catch (IOException e1) {
-//						// TODO Auto-generated catch block
-//						e1.printStackTrace();
-//					}
-//
-//					ArrayList<Point3D> path = null;
-//					try {
-//						path = equation.getPath(guiGame.boxes, guiGame.fruits, guiGame.player.getPosition(), index);
-//
-//						for(int i=0;i<path.size();i++) {
-//							
-//							pix playerPix=new pix(guiGame.player.getX(),guiGame.player.getY());
-//							pix fruitPix=new pix(path.get(i).x(),path.get(i).y());
-//							double angle=converts.angleBet2Pixels(playerPix, fruitPix, getHeight(), getWidth());				
-//							System.out.println(angle);
-//
-//							while(!guiGame.player.getPosition().isEquals(path.get(i)) && guiGame.getPlay1().isRuning()) {
-//
-//								angle=converts.angleBet2Pixels(playerPix, fruitPix, getHeight(), getWidth());				
-//
-//								guiGame.getPlay1().rotate(angle);
-//								System.out.println(guiGame.getPlay1().isRuning());
-//								ArrayList<String>gameAfterStep=guiGame.getPlay1().getBoard();
-//								game.clear();
-//								game.createNewGame(gameAfterStep);
-//								try {
-//									game.paintGame(getHeight(), getWidth());
-//
-//									try {
-//										Thread.sleep(100);// get time to draw before make more iteration
-//									} catch (InterruptedException e) {
-//										// TODO Auto-generated catch block
-//										e.printStackTrace();
-//									}
-//								} catch (IOException e) {
-//									// TODO Auto-generated catch block
-//									e.printStackTrace();
-//								}
-//							}
-//						}
-//
-//					} catch (IOException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}							
-//				}
-//
-//			}
-//		}.start();
-//	}
-
-	
-	
+	/**
+	 * This function start the automatic game, it choose location for the player and decide 
+	 * which paths to choose in order to eat the fruits
+	 * @throws IOException
+	 */
 	public  void startAutoPlay() throws IOException {
 
-		//for example 8
-//		Point3D playerCoords=converts.pixel2Coords(70, 288,getHeight(), getWidth());
-//		guiGame.getPlay1().setInitLocation(playerCoords.x(),playerCoords.y());
-//		metaDataPack data=new metaDataPack("M",20,1);
-//		guiGame.player=new packman(data,new Point3D(70,288));
-		
-		//for example 5
-		double x=guiGame.fruits.get(0).getX();
-		double y=guiGame.fruits.get(0).getY();
-		//400 //500
-		Point3D playerCoords=converts.pixel2Coords(400, 500,getHeight(), getWidth());
+		//223,376
+		double xFruit0=guiGame.fruits.get(0).getX();
+		double yFruit0=guiGame.fruits.get(0).getY();
+		Point3D playerCoords=converts.pixel2Coords(400,500,getHeight(), getWidth());
 		guiGame.getPlay1().setInitLocation(playerCoords.x(),playerCoords.y());
 		metaDataPack data=new metaDataPack("M",20,1);
 		guiGame.player=new packman(data,new Point3D(400,500));
@@ -643,7 +509,7 @@ class MyJLabel extends JLabel implements MouseListener,MouseMotionListener
 		System.out.println("Player created the game start");
 		guiGame.getPlay1().start();
 			
-		new Thread() // annonymy thread
+		new Thread() // anonymous thread
 		{
 			public void run()
 			{
@@ -655,63 +521,61 @@ class MyJLabel extends JLabel implements MouseListener,MouseMotionListener
 					try {
 						
 						index = equation.minToEat(guiGame.boxes,guiGame.fruits, guiGame.player.getPosition(),h,w);
+
 					} catch (IOException e1) {
-						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
 
 					ArrayList<Point3D> path = null;
 					try {
 						path = equation.getPath(guiGame.boxes, guiGame.fruits, guiGame.player.getPosition(), index,h,w);
-						System.out.println("////////////////////////////////////////////////////////////////////////////");
 						for(int i=0;i<path.size();i++) {
-						//	path = equation.getPath(guiGame.boxes, guiGame.fruits, guiGame.player.getPosition(), index,h,w);
 
 							pix playerPix=new pix(guiGame.player.getX(),guiGame.player.getY());
-							pix fruitPix=new pix(path.get(i).x(),path.get(i).y());
-							double angle=converts.angleBet2Pixels(playerPix, fruitPix, getHeight(), getWidth());				
+							pix pathPix=new pix(path.get(i).x(),path.get(i).y());
+							double angle=converts.angleBet2Pixels(playerPix, pathPix, getHeight(), getWidth());				
+							boolean find=true;
 							
-								boolean find=true;
 							while(find && guiGame.getPlay1().isRuning()) {
-								path = equation.getPath(guiGame.boxes, guiGame.fruits, guiGame.player.getPosition(), index,h,w);
+				     			path = equation.getPath(guiGame.boxes, guiGame.fruits, guiGame.player.getPosition(), index,h,w);
 								index = equation.minToEat(guiGame.boxes,guiGame.fruits, guiGame.player.getPosition(),h,w);
 								playerPix=new pix(guiGame.player.getX(),guiGame.player.getY());
-								fruitPix=new pix(path.get(0).x(),path.get(0).y());
-								angle=converts.angleBet2Pixels(playerPix, fruitPix, getHeight(), getWidth());
-								System.out.println("angle :"+angle +"kabasooso");
+								pathPix=new pix(path.get(0).x(),path.get(0).y());
+								
+								angle=converts.angleBet2Pixels(playerPix, pathPix, getHeight(), getWidth());
+								System.out.println("angle :"+angle);
 								guiGame.getPlay1().rotate(angle);
+							
 								ArrayList<String>gameAfterStep=guiGame.getPlay1().getBoard();
 								game.clear();
 								game.createNewGame(gameAfterStep);
 								try {
+									
 									game.paintGame(getHeight(), getWidth());
 
 									try {
-										Thread.sleep(300);// get time to draw before make more iteration
+										Thread.sleep(300); // get time to draw before make more iteration
 									} catch (InterruptedException e) {
-										// TODO Auto-generated catch block
 										e.printStackTrace();
 									}
 								} catch (IOException e) {
-									// TODO Auto-generated catch block
 									e.printStackTrace();
 								}
-								//fruitPix doesnt exist in fruits
-								//path = equation.getPath(guiGame.boxes, guiGame.fruits, guiGame.player.getPosition(), index,h,w);//not good here
 								index = equation.minToEat(guiGame.boxes,guiGame.fruits, guiGame.player.getPosition(),h,w);
 								if (index>=0 && index<guiGame.fruits.size()) {
 								
-									pix kabasoPix=new pix(guiGame.fruits.get(index).getX(),guiGame.fruits.get(index).getY());
-									find=exist(kabasoPix);
-								}										
+									pix fruitPix=new pix(guiGame.fruits.get(index).getX(),guiGame.fruits.get(index).getY());
+									find=exist(fruitPix);
+								}									
 							}
 						}
 
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}							
 				}
+				JOptionPane.showMessageDialog(null,"The game is Over the result:"
+						+ " "+guiGame.getPlay1().getStatistics());
 
 			}
 		}.start();
@@ -728,10 +592,7 @@ class MyJLabel extends JLabel implements MouseListener,MouseMotionListener
 				}
 			}
 			return false;
-		
 	}
-
-	//
 
 	/**
 	 * this function change the position of fruits accordingly to resize window
@@ -859,7 +720,7 @@ class MyJLabel extends JLabel implements MouseListener,MouseMotionListener
 		reSizePackman();
 		reSizeGhost();
 		reSizeBox();
-		if (guiGame.player!=null) {// the first time we load the screen player==null
+		if (guiGame.player!=null) { // the first time we load the screen player==null
 			reSizePlayer();
 		}
 
@@ -889,7 +750,6 @@ class MyJLabel extends JLabel implements MouseListener,MouseMotionListener
 				packman = ImageIO.read(new File("rsz_15fruit.png"));
 				g.drawImage(packman,guiGame.x,guiGame.y,this);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			i++;
@@ -902,25 +762,36 @@ class MyJLabel extends JLabel implements MouseListener,MouseMotionListener
 		int i=0; // index of the arrayList
 		while(i<sizeGhost) { // there are still fruits to show
 
-			g.setColor(Color.red);
 			guiGame.x = (int)guiGame.getGhostArr().get(i).getX(); // get the X-Axis pixel
 			guiGame.y = (int)guiGame.getGhostArr().get(i).getY(); // get the Y-Axis pixel
 
-			g.fillOval(guiGame.x, guiGame.y, 7, 7);
+			Image ghost;
+			try {
+				ghost = ImageIO.read(new File("ghost small.png"));
+				g.drawImage(ghost,guiGame.x,guiGame.y,this);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
 			i++;
 		}
 	}
 
 	public void paintPlayer(Graphics g) {
 
-		g.setColor(Color.PINK);
 
 		if(guiGame.player!=null) {
 			int pX=(int) guiGame.player.getPosition().get_x();
 			int pY=(int) guiGame.player.getPosition().get_y();
 
-			g.fillOval(pX, pY, 20, 20);
 
+			Image player;
+			try {
+				player = ImageIO.read(new File("player.png"));
+				g.drawImage(player,pX,pY,this);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -963,7 +834,6 @@ class MyJLabel extends JLabel implements MouseListener,MouseMotionListener
 				packman = ImageIO.read(new File("rsz_15packman.png"));
 				g.drawImage(packman, guiGame.x,guiGame.y,this);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			j++;
@@ -988,48 +858,10 @@ class MyJLabel extends JLabel implements MouseListener,MouseMotionListener
 	@Override
 	public void mousePressed(MouseEvent e) {
 
-		// aric mybe delete make the functions outside this claa
 
 		guiGame.x=e.getX();
 		guiGame.y=e.getY();
 
-		if (guiGame.addPack) {
-			String i="draw pack";
-			i+=1;
-			metaDataPack data=new metaDataPack(i,1,1);
-			Point3D position =new Point3D(guiGame.x,guiGame.y,0); // add packman location in pixels
-			packman pack=new packman(data,position);
-			guiGame.packmans.add(pack);
-			repaint();
-			System.out.println("number of packmans: "+guiGame.packmans.size());	
-			guiGame.addPack=false;
-		}
-
-		if (guiGame.addFruit) {
-
-			String j="draw fruit";
-			j+=1;
-			metaDataFruit data=new metaDataFruit(j,1);
-			Point3D position =new Point3D(guiGame.x,guiGame.y,0); // add fruit location in pixels
-			fruit f=new fruit(data,position);
-			guiGame.fruits.add(f);
-			repaint();
-			System.out.println("number of fruits: "+guiGame.fruits.size());
-			guiGame.addFruit=false;
-		}
-
-		if (guiGame.addGhost) {
-
-			String h="draw ghost";
-			h+=1;
-			metaDataPack data=new metaDataPack(h,1,1);
-			Point3D position =new Point3D(guiGame.x,guiGame.y,0); // add packman location in pixels
-			ghost g=new ghost(data,position);
-			guiGame.ghosts.add(g);
-			repaint();
-			System.out.println("number of ghosts: "+guiGame.ghosts.size());	
-			guiGame.addGhost=false;
-		}
 		if (guiGame.addPlayer) {
 
 			int x=guiGame.x;
@@ -1041,12 +873,12 @@ class MyJLabel extends JLabel implements MouseListener,MouseMotionListener
 			repaint();
 			guiGame.addPlayer=false;
 			guiGame.playerItem.setEnabled(false);
-			guiGame.stepItem.setEnabled(true);//aric 
+			guiGame.stepItem.setEnabled(true);
 
-			//set init location for the player
+			// initialize location for the player
 			Point3D playerCoords=converts.pixel2Coords(x, y,getHeight(), getWidth());
 			guiGame.getPlay1().setInitLocation(playerCoords.x(),playerCoords.y());
-			guiGame.getPlay1().start();//aric
+			guiGame.getPlay1().start();
 			System.out.println("Player created the game start");
 			startGame();
 		}
@@ -1054,12 +886,6 @@ class MyJLabel extends JLabel implements MouseListener,MouseMotionListener
 		if (guiGame.step) {
 
 			start=true;
-
-		}
-
-		if (guiGame.run) {
-
-		
 		}
 
 		System.out.println("("+ guiGame.x + "," + guiGame.y +")");
@@ -1077,8 +903,8 @@ class MyJLabel extends JLabel implements MouseListener,MouseMotionListener
 	public void mouseMoved(MouseEvent e)
 	{
 		// change the value of x and y according to the 
-		//mouse position then the thread will see the new position if the mouse moved 
-		//and the old position if the mouse stays
+		// mouse position then the thread will see the new position if the mouse moved 
+		// and the old position if the mouse stays
 		guiGame.x=e.getX();
 		guiGame.y=e.getY();
 
