@@ -42,6 +42,8 @@ After we received the shortest path, we iterate the Path points and calculate az
 ###### *Find closest fruit*
 By using Dijakstra Algorithm we can calculate the distance between Player position to fruits positions and find the closest fruit.
 
+###### *for more details about the Algorithm you can find in Wiki page*
+
 ## *Human program:*
 There is another optional to play Packman-Game by your mouse.
 
@@ -52,3 +54,5 @@ place to eat all fruits in the shortest time.
 ###### *Start the Game*
 Immediately when you choose the player location, the game start and
 your player start move to your mouse location on the Screen.
+
+for example our score for configuration 8 is : 81 points
