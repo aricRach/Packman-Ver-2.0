@@ -298,7 +298,7 @@ public class guiGame extends JFrame
 	public  void writeResults(String results) {
 		 //try write to the file
 				FileDialog fd = new FileDialog(this, "Save the text file", FileDialog.SAVE);
-				fd.setFile("newFile.csv");
+				fd.setFile("statistics.csv");
 				fd.setFilenameFilter(new FilenameFilter() {
 					@Override
 					public boolean accept(File dir, String name) {
@@ -500,21 +500,24 @@ class MyJLabel extends JLabel implements MouseListener,MouseMotionListener
 		//223,376
 		double xFruit0=guiGame.fruits.get(0).getX();
 		double yFruit0=guiGame.fruits.get(0).getY();
-		Point3D playerCoords=converts.pixel2Coords(400,500,getHeight(), getWidth());
+		Point3D playerCoords=converts.pixel2Coords(xFruit0,yFruit0,getHeight(), getWidth());
 		guiGame.getPlay1().setInitLocation(playerCoords.x(),playerCoords.y());
 		metaDataPack data=new metaDataPack("M",20,1);
-		guiGame.player=new packman(data,new Point3D(400,500));
+		guiGame.player=new packman(data,new Point3D(xFruit0,yFruit0));
 		
 		repaint();
 		System.out.println("Player created the game start");
 		guiGame.getPlay1().start();
-			
+
+		
 		new Thread() // anonymous thread
 		{
 			public void run()
 			{
 
-				while(guiGame.getPlay1().isRuning()) {
+				boolean stop=false; // if the ArrayList of fruits is empty - stop the game
+				
+				while(guiGame.getPlay1().isRuning() && !stop ) {
 					double h=getHeight();
 					double w=getWidth();
 					int index = 0;
@@ -528,16 +531,26 @@ class MyJLabel extends JLabel implements MouseListener,MouseMotionListener
 
 					ArrayList<Point3D> path = null;
 					try {
+						if(guiGame.fruitSize()==0) {
+		     				break;
+		     			}
+						
 						path = equation.getPath(guiGame.boxes, guiGame.fruits, guiGame.player.getPosition(), index,h,w);
-						for(int i=0;i<path.size();i++) {
-
+						for(int i=0;i<path.size() && !stop;i++) {
+				
 							pix playerPix=new pix(guiGame.player.getX(),guiGame.player.getY());
 							pix pathPix=new pix(path.get(i).x(),path.get(i).y());
 							double angle=converts.angleBet2Pixels(playerPix, pathPix, getHeight(), getWidth());				
 							boolean find=true;
 							
 							while(find && guiGame.getPlay1().isRuning()) {
-				     			path = equation.getPath(guiGame.boxes, guiGame.fruits, guiGame.player.getPosition(), index,h,w);
+								
+								if(guiGame.fruitSize()==0) {
+				     				stop=true;
+				     				break;
+				     			}
+								path = equation.getPath(guiGame.boxes, guiGame.fruits, guiGame.player.getPosition(), index,h,w);
+				     			
 								index = equation.minToEat(guiGame.boxes,guiGame.fruits, guiGame.player.getPosition(),h,w);
 								playerPix=new pix(guiGame.player.getX(),guiGame.player.getY());
 								pathPix=new pix(path.get(0).x(),path.get(0).y());
@@ -552,7 +565,6 @@ class MyJLabel extends JLabel implements MouseListener,MouseMotionListener
 								try {
 									
 									game.paintGame(getHeight(), getWidth());
-
 									try {
 										Thread.sleep(300); // get time to draw before make more iteration
 									} catch (InterruptedException e) {
