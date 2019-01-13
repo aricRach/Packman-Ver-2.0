@@ -153,10 +153,10 @@ public class equation {
 
 			//avoid from valid lines inside the blocks 
 			//cant line end to start and right to left
-			double endCheck=end.y()-10;
-			double startCheck=start.y()+10;
-			double rightCheck=right.y()+10;
-			double leftCheck=left.y()-10;
+			double endCheck=end.y()-15;
+			double startCheck=start.y()+5;
+			double rightCheck=right.y()+5;
+			double leftCheck=left.y()-15;
 
 			Point3D pStart=new Point3D(start.x(),startCheck);
 			Point3D pEnd=new Point3D(end.x(),endCheck);
@@ -256,13 +256,13 @@ public class equation {
 			start.set_y(start.get_y()+5);
 
 			Point3D end = new Point3D(boxes.get(i).getEnd());
-			end.set_y(end.get_y()-60);
+			end.set_y(end.get_y()-15);
 
 			Point3D right = new Point3D(boxes.get(i).getRightDown());
 			right.set_y(right.get_y()+5);
 
 			Point3D left = new Point3D(boxes.get(i).getLeftUp());
-			left.set_y(left.get_y()-60);
+			left.set_y(left.get_y()-15);
 
 			addStart=check(boxes,player,start);
 			addEnd=check(boxes,player,end);
@@ -378,13 +378,13 @@ public class equation {
 			start.set_y(start.get_y()+5);
 
 			Point3D end = new Point3D(boxes.get(i).getEnd());
-			end.set_y(end.get_y()-60);
+			end.set_y(end.get_y()-15);
 
 			Point3D right = new Point3D(boxes.get(i).getRightDown());
 			right.set_y(right.get_y()+5);
 
 			Point3D left = new Point3D(boxes.get(i).getLeftUp());
-			left.set_y(left.get_y()-60);
+			left.set_y(left.get_y()-15);
 
 			calcBoxes(G,boxes, start,"box "+i+" start",h,w);
 			calcBoxes(G,boxes, end,"box "+i+" end",h,w);
