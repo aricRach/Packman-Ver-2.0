@@ -26,6 +26,7 @@ In order to make the player move we need to use rotate function by give the func
 
 In order to know the state of the game we use the function get board that helps us show the moving on the screen.
 
+<img src="https://imagizer.imageshack.com/img921/2060/2XdRo7.jpg" width="750" height="450" >
 
 ## *Automatic program:*
 **Main Algorithm idea:**
